@@ -1,0 +1,33 @@
+name: Production smoke test
+
+on:
+  workflow_dispatch:
+    inputs:
+      include_ai:
+        description: Run one paid AI recommendation check
+        required: false
+        default: false
+        type: boolean
+  schedule:
+    - cron: "20 2 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Check live service
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Check production pages and public-data API
+        env:
+          SMOKE_BASE_URL: https://wongok-borderless.vercel.app
+          SMOKE_CHAT: ${{ inputs.include_ai && '1' || '0' }}
+        run: npm run smoke:production

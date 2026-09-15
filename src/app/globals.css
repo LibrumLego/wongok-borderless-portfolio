@@ -1,0 +1,2230 @@
+@import "tailwindcss";
+
+/* 네이비 + 오렌지 중심의 차분한 관광 안내 화면 */
+:root {
+  --background: #f7f5f1;
+  --foreground: #1b2a4a;
+  --navy: #1b2a4a;
+  --navy-light: #2e4370;
+  --orange: #e8630a;
+  --orange-soft: #fdeadd;
+  --gold: #c9a227;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-navy: var(--navy);
+  --color-navy-light: var(--navy-light);
+  --color-orange: var(--orange);
+  --color-orange-soft: var(--orange-soft);
+  --color-gold: var(--gold);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/*
+ * 이 서비스는 라이트 테마 한 가지로만 디자인돼 있다.
+ * 선언하지 않으면 기기가 다크모드일 때 일부 브라우저(특히 안드로이드 계열)가
+ * 색을 임의로 반전시켜, 같은 화면을 보는데도 어떤 사람은 어둡게 보는 문제가
+ * 생긴다. 테마를 라이트로 못박아 어디서나 같은 화면이 나오게 한다.
+ */
+:root {
+  color-scheme: light;
+}
+
+/* 페이지 스크롤 유무에 따라 콘텐츠가 좌우로 밀리지 않도록 스크롤바 자리를 항상 예약 */
+html {
+  scrollbar-gutter: stable;
+}
+
+body {
+  background:
+    linear-gradient(180deg, #fbfaf8 0, var(--background) 22rem),
+    var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  overflow-x: clip;
+}
+
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 3px solid rgb(232 99 10 / 0.32);
+  outline-offset: 3px;
+}
+
+.page-shell {
+  --page-accent: 232 99 10;
+  --page-accent-two: 201 162 39;
+  position: relative;
+  isolation: isolate;
+}
+
+.page-atmosphere {
+  --page-accent: 232 99 10;
+  --page-accent-two: 201 162 39;
+  --ambient-accent: 232 99 10;
+  --ambient-accent-two: 201 162 39;
+  position: absolute;
+  top: 0;
+  bottom: -7rem;
+  left: 50%;
+  z-index: -1;
+  width: 100vw;
+  overflow: hidden;
+  pointer-events: none;
+  transform: translateX(-50%);
+  /* Fade the entire glow before the container edge to avoid a horizontal seam. */
+  mask-image: linear-gradient(
+    to bottom,
+    black 0,
+    black 58%,
+    rgb(0 0 0 / 0.88) 72%,
+    rgb(0 0 0 / 0.52) 86%,
+    rgb(0 0 0 / 0.16) 96%,
+    transparent 100%
+  );
+}
+
+@media (min-width: 768px) {
+  .page-atmosphere {
+    bottom: 0;
+  }
+}
+
+.page-atmosphere::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background:
+    radial-gradient(circle at 18% 8%, rgb(var(--ambient-accent-two) / 0.13), transparent 34%),
+    radial-gradient(circle at 82% 15%, rgb(var(--ambient-accent) / 0.14), transparent 38%);
+  animation: page-color-breathe 7s ease-in-out infinite alternate;
+}
+
+.page-atmosphere::after {
+  position: absolute;
+  inset: 0;
+  opacity: 0.32;
+  content: "";
+  background-image: radial-gradient(
+    circle,
+    rgb(var(--ambient-accent) / 0.16) 1px,
+    transparent 1.5px
+  );
+  background-size: 24px 24px;
+  mask-image: linear-gradient(135deg, black, transparent 38%);
+}
+
+.page-atmosphere[data-variant="home"] {
+  --ambient-accent: 232 99 10;
+  --ambient-accent-two: 201 162 39;
+}
+
+.page-atmosphere[data-variant="story"] {
+  --ambient-accent: 148 99 65;
+  --ambient-accent-two: 201 162 39;
+}
+
+.page-atmosphere[data-variant="map"] {
+  --ambient-accent: 50 74 121;
+  --ambient-accent-two: 232 99 10;
+}
+
+.page-atmosphere[data-variant="guide"] {
+  --ambient-accent: 91 74 156;
+  --ambient-accent-two: 232 99 10;
+}
+
+.page-atmosphere[data-variant="course"] {
+  --ambient-accent: 232 99 10;
+  --ambient-accent-two: 50 74 121;
+}
+
+.page-atmosphere[data-variant="stamp"] {
+  --ambient-accent: 201 162 39;
+  --ambient-accent-two: 50 74 121;
+}
+
+.page-atmosphere:not([data-variant="home"])::after {
+  opacity: 0.4;
+  background-size: 21px 21px;
+  mask-image: linear-gradient(135deg, black, transparent 62%);
+}
+
+.page-atmosphere:not([data-variant="home"]) .page-atmosphere-grid {
+  opacity: 0.4;
+  background-size: 36px 36px;
+  mask-image: linear-gradient(to bottom, black, transparent 88%);
+}
+
+.page-atmosphere-grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.32;
+  background-image:
+    linear-gradient(rgb(var(--ambient-accent) / 0.065) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--ambient-accent) / 0.065) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(to bottom, black, transparent 72%);
+}
+
+.page-atmosphere-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(3px);
+  opacity: 0.82;
+  animation: page-orb-drift 8s ease-in-out infinite alternate;
+}
+
+.page-atmosphere-orb-one {
+  top: 3rem;
+  right: -7rem;
+  width: 18rem;
+  height: 18rem;
+  background: radial-gradient(
+    circle,
+    rgb(var(--ambient-accent) / 0.14),
+    transparent 68%
+  );
+}
+
+.page-atmosphere-orb-two {
+  top: 26rem;
+  left: -9rem;
+  width: 22rem;
+  height: 22rem;
+  background: radial-gradient(
+    circle,
+    rgb(var(--ambient-accent-two) / 0.12),
+    transparent 70%
+  );
+  animation-delay: -3s;
+  animation-duration: 11s;
+}
+
+.page-atmosphere-orb-three {
+  top: 62%;
+  right: -6rem;
+  width: 20rem;
+  height: 20rem;
+  background: radial-gradient(
+    circle,
+    rgb(var(--ambient-accent) / 0.09),
+    transparent 69%
+  );
+  animation-delay: -5s;
+  animation-duration: 13s;
+}
+
+.page-atmosphere[data-variant="home"] .page-atmosphere-orb-three {
+  display: none;
+}
+
+.page-atmosphere-glints {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.page-atmosphere-glints i {
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+  background: rgb(var(--ambient-accent) / 0.15);
+  clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
+  filter: drop-shadow(0 0 12px rgb(var(--ambient-accent-two) / 0.2));
+  animation: page-glint-drift 7s ease-in-out infinite alternate;
+}
+
+.page-atmosphere-glints i:nth-child(1) {
+  top: 13%;
+  left: 6%;
+}
+
+.page-atmosphere-glints i:nth-child(2) {
+  top: 28%;
+  right: 8%;
+  width: 0.65rem;
+  height: 0.65rem;
+  animation-delay: -1.2s;
+}
+
+.page-atmosphere-glints i:nth-child(3) {
+  top: 46%;
+  left: 12%;
+  width: 0.55rem;
+  height: 0.55rem;
+  animation-delay: -2.4s;
+}
+
+.page-atmosphere-glints i:nth-child(4) {
+  top: 61%;
+  right: 15%;
+  width: 1.2rem;
+  height: 1.2rem;
+  animation-delay: -3.6s;
+}
+
+.page-atmosphere-glints i:nth-child(5) {
+  top: 78%;
+  left: 5%;
+  width: 0.75rem;
+  height: 0.75rem;
+  animation-delay: -4.8s;
+}
+
+.page-atmosphere-glints i:nth-child(6) {
+  right: 9%;
+  bottom: 7%;
+  width: 0.5rem;
+  height: 0.5rem;
+  animation-delay: -6s;
+}
+
+.page-atmosphere-glints i:nth-child(7) {
+  top: 22%;
+  left: 54%;
+  width: 0.42rem;
+  height: 0.42rem;
+  animation-delay: -2.8s;
+}
+
+.page-atmosphere-glints i:nth-child(8) {
+  top: 52%;
+  right: 38%;
+  width: 0.58rem;
+  height: 0.58rem;
+  animation-delay: -4.1s;
+}
+
+.page-atmosphere-glints i:nth-child(9) {
+  bottom: 22%;
+  left: 39%;
+  width: 0.36rem;
+  height: 0.36rem;
+  animation-delay: -5.3s;
+}
+
+.page-atmosphere-glints i:nth-child(10) {
+  right: 31%;
+  bottom: 4%;
+  width: 0.46rem;
+  height: 0.46rem;
+  animation-delay: -6.5s;
+}
+
+.page-atmosphere[data-variant="home"] .page-atmosphere-glints i:nth-child(n + 7) {
+  display: none;
+}
+
+.page-atmosphere:not([data-variant="home"]):not([data-variant="guide"]) .page-atmosphere-glints i {
+  background: rgb(var(--ambient-accent) / 0.18);
+  filter: drop-shadow(0 0 14px rgb(var(--ambient-accent-two) / 0.22));
+}
+
+.page-atmosphere[data-variant="guide"] .page-atmosphere-glints i {
+  background: rgb(var(--ambient-accent) / 0.2);
+  filter: drop-shadow(0 0 16px rgb(var(--ambient-accent-two) / 0.26));
+}
+
+.page-atmosphere[data-variant="stamp"] .page-atmosphere-glints i {
+  background: rgb(var(--ambient-accent) / 0.18);
+  filter: drop-shadow(0 0 14px rgb(var(--ambient-accent-two) / 0.22));
+}
+
+.page-atmosphere-nodes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.page-atmosphere-nodes i {
+  position: absolute;
+  width: 0.42rem;
+  height: 0.42rem;
+  border: 1px solid rgb(var(--ambient-accent) / 0.22);
+  border-radius: 9999px;
+  background: rgb(255 255 255 / 0.5);
+  box-shadow:
+    0 0 0 0.3rem rgb(var(--ambient-accent) / 0.035),
+    0 0 22px rgb(var(--ambient-accent-two) / 0.12);
+  animation: page-node-pulse 4.8s ease-in-out infinite;
+}
+
+.page-atmosphere-nodes i::after {
+  position: absolute;
+  inset: -0.3rem;
+  border: 1px solid rgb(var(--ambient-accent-two) / 0.18);
+  border-radius: 9999px;
+  content: "";
+  opacity: 0;
+  animation: page-node-ripple 7.2s ease-out infinite;
+  animation-delay: inherit;
+}
+
+.page-atmosphere-nodes i:nth-child(1) { top: 9%; left: 8%; }
+.page-atmosphere-nodes i:nth-child(2) { top: 18%; right: 13%; animation-delay: -0.7s; }
+.page-atmosphere-nodes i:nth-child(3) { top: 32%; left: 17%; animation-delay: -1.4s; }
+.page-atmosphere-nodes i:nth-child(4) { top: 44%; right: 7%; animation-delay: -2.1s; }
+.page-atmosphere-nodes i:nth-child(5) { top: 55%; left: 10%; animation-delay: -2.8s; }
+.page-atmosphere-nodes i:nth-child(6) { top: 66%; right: 20%; animation-delay: -3.5s; }
+.page-atmosphere-nodes i:nth-child(7) { top: 77%; left: 23%; animation-delay: -4.2s; }
+.page-atmosphere-nodes i:nth-child(8) { top: 86%; right: 9%; animation-delay: -4.9s; }
+.page-atmosphere-nodes i:nth-child(9) { top: 94%; left: 46%; animation-delay: -5.6s; }
+.page-atmosphere-nodes i:nth-child(10) { top: 15%; left: 39%; animation-delay: -2.3s; }
+.page-atmosphere-nodes i:nth-child(11) { top: 38%; right: 34%; animation-delay: -3.1s; }
+.page-atmosphere-nodes i:nth-child(12) { top: 59%; left: 43%; animation-delay: -3.9s; }
+.page-atmosphere-nodes i:nth-child(13) { top: 73%; right: 39%; animation-delay: -4.7s; }
+.page-atmosphere-nodes i:nth-child(14) { top: 90%; left: 69%; animation-delay: -5.5s; }
+
+.page-atmosphere[data-variant="home"] .page-atmosphere-nodes i:nth-child(n + 10) {
+  display: none;
+}
+
+.page-atmosphere:not([data-variant="home"]):not([data-variant="guide"]) .page-atmosphere-nodes i {
+  background: rgb(var(--ambient-accent) / 0.2);
+  box-shadow:
+    0 0 0 0.32rem rgb(var(--ambient-accent) / 0.038),
+    0 0 24px rgb(var(--ambient-accent-two) / 0.16);
+}
+
+.page-atmosphere-rings {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.page-atmosphere-rings i {
+  position: absolute;
+  border: 1px solid rgb(var(--ambient-accent-two) / 0.1);
+  border-radius: 9999px;
+  box-shadow: inset 0 0 45px rgb(var(--ambient-accent) / 0.025);
+  animation: page-ring-turn 28s linear infinite;
+}
+
+.page-atmosphere-rings i::before,
+.page-atmosphere-rings i::after {
+  position: absolute;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 9999px;
+  background: rgb(var(--ambient-accent-two) / 0.18);
+  content: "";
+}
+
+.page-atmosphere-rings i::before {
+  top: 13%;
+  left: 11%;
+}
+
+.page-atmosphere-rings i::after {
+  right: 7%;
+  bottom: 22%;
+}
+
+.page-atmosphere-rings i:nth-child(1) {
+  top: 20%;
+  right: -7rem;
+  width: 21rem;
+  height: 21rem;
+}
+
+.page-atmosphere-rings i:nth-child(2) {
+  bottom: 18%;
+  left: -8rem;
+  width: 25rem;
+  height: 25rem;
+  border-style: dashed;
+  animation-direction: reverse;
+  animation-duration: 34s;
+}
+
+.page-atmosphere-rings i:nth-child(3) {
+  top: 48%;
+  left: calc(50% - 8rem);
+  width: 16rem;
+  height: 16rem;
+  border-style: dotted;
+  opacity: 0.72;
+  animation-duration: 22s;
+}
+
+.page-atmosphere[data-variant="home"] .page-atmosphere-rings i:nth-child(3) {
+  display: none;
+}
+
+.page-atmosphere[data-variant="guide"] .page-atmosphere-nodes i {
+  background: rgb(var(--ambient-accent) / 0.28);
+  box-shadow:
+    0 0 0 0.35rem rgb(var(--ambient-accent) / 0.04),
+    0 0 26px rgb(var(--ambient-accent-two) / 0.2);
+}
+
+.page-atmosphere[data-variant="stamp"] .page-atmosphere-rings i {
+  border-style: double;
+  border-width: 3px;
+}
+
+.page-shell:has(.course-showcase-card:hover) .page-atmosphere[data-variant="course"] .page-atmosphere-glints i,
+.page-shell:has(.stamp-collect-card:hover) .page-atmosphere[data-variant="stamp"] .page-atmosphere-glints i {
+  background: rgb(var(--ambient-accent) / 0.24);
+  animation-duration: 3.5s;
+}
+
+@media (max-width: 767px) {
+  .page-atmosphere-glints i:nth-child(n + 7) {
+    display: none;
+  }
+
+  .page-atmosphere[data-variant="home"] .page-atmosphere-glints i:nth-child(n + 5) {
+    display: none;
+  }
+
+  .page-atmosphere-nodes i:nth-child(even),
+  .page-atmosphere-rings i:nth-child(n + 2) {
+    display: none;
+  }
+
+}
+
+/* Keep the restored street atmosphere quiet behind the interactive map. */
+.page-atmosphere[data-variant="map"] {
+  opacity: 0.5;
+}
+
+.page-atmosphere[data-variant="map"]::before,
+.page-atmosphere[data-variant="map"] *,
+.page-atmosphere[data-variant="map"] *::before,
+.page-atmosphere[data-variant="map"] *::after {
+  animation: none;
+}
+
+.page-intro-card {
+  position: relative;
+  overflow: hidden;
+  padding: 1rem;
+  border: 1px solid rgb(255 255 255 / 0.82);
+  border-radius: 1.5rem;
+  background: rgb(255 255 255 / 0.84);
+  box-shadow:
+    0 18px 45px -34px rgb(27 42 74 / 0.26),
+    inset 0 1px rgb(255 255 255 / 0.92);
+  backdrop-filter: blur(14px);
+}
+
+.page-intro-card::before {
+  display: none;
+}
+
+.page-intro-card::after {
+  display: none;
+}
+
+.page-intro-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 767px) {
+  .page-intro-card {
+    padding-top: 3.25rem;
+  }
+}
+
+.page-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.3rem;
+  color: rgb(var(--page-accent, 232 99 10));
+  font-size: 0.62rem;
+  font-weight: 850;
+  letter-spacing: 0.16em;
+}
+
+.page-kicker-dot {
+  width: 0.38rem;
+  height: 0.38rem;
+  border-radius: 9999px;
+  background: currentColor;
+  box-shadow: 0 0 0 0.25rem rgb(var(--page-accent, 232 99 10) / 0.1);
+  animation: page-dot-pulse 2s ease-out infinite;
+}
+
+.page-icon-tile {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 0.8);
+  border-radius: 1.15rem;
+  background: rgb(253 234 221 / 0.72);
+  color: rgb(var(--page-accent, 232 99 10));
+  box-shadow:
+    0 14px 35px rgb(var(--page-accent, 232 99 10) / 0.12),
+    inset 0 1px rgb(255 255 255 / 0.9);
+  backdrop-filter: blur(12px);
+}
+
+.page-icon-tile::after {
+  display: none;
+}
+
+.page-icon-tile > * {
+  position: relative;
+  z-index: 1;
+}
+
+.interactive-panel {
+  transition:
+    transform 0.28s ease,
+    border-color 0.28s ease,
+    box-shadow 0.28s ease;
+}
+
+.filter-group-label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.filter-group-label::before {
+  width: 0.32rem;
+  height: 0.32rem;
+  border-radius: 9999px;
+  background: var(--orange);
+  box-shadow: 0 0 0 0.2rem rgb(232 99 10 / 0.08);
+  content: "";
+}
+
+.filter-chip {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  box-shadow: 0 5px 16px -12px rgb(27 42 74 / 0.38);
+  transform-origin: center;
+}
+
+.filter-chip::before {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  content: "";
+  background: linear-gradient(
+    105deg,
+    transparent 28%,
+    rgb(255 255 255 / 0.72),
+    transparent 72%
+  );
+  translate: -130% 0;
+  transition: translate 0.42s ease;
+}
+
+.filter-chip:not(:disabled):hover::before {
+  translate: 130% 0;
+}
+
+.filter-chip:not(:disabled):active {
+  transform: scale(0.9);
+}
+
+.filter-chip-active {
+  animation: filter-chip-select 0.42s cubic-bezier(0.2, 1.65, 0.45, 1) both;
+  box-shadow:
+    0 9px 24px -12px rgb(232 99 10 / 0.72),
+    0 0 0 0.22rem rgb(232 99 10 / 0.1);
+}
+
+.filter-chip-active::after {
+  position: absolute;
+  inset: -25%;
+  z-index: 0;
+  border-radius: 9999px;
+  content: "";
+  background: radial-gradient(circle, rgb(255 255 255 / 0.42), transparent 62%);
+  animation: filter-chip-flash 0.48s ease-out both;
+}
+
+@media (hover: hover) {
+  .interactive-panel:hover {
+    transform: translateY(-3px);
+    border-color: rgb(var(--page-accent, 232 99 10) / 0.22);
+    box-shadow: 0 20px 45px -24px rgb(var(--page-accent, 232 99 10) / 0.3);
+  }
+}
+
+.map-showcase {
+  box-shadow:
+    0 24px 60px -32px rgb(232 99 10 / 0.3),
+    0 0 0 1px rgb(255 255 255 / 0.8);
+}
+
+.map-showcase::after {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  border: 1px solid rgb(255 255 255 / 0.65);
+  border-radius: inherit;
+  content: "";
+  pointer-events: none;
+}
+
+.guide-spark-orbit {
+  position: relative;
+  display: grid;
+  width: 6.5rem;
+  height: 6.5rem;
+  place-items: center;
+}
+
+.guide-spark-orbit::before,
+.guide-spark-orbit::after {
+  position: absolute;
+  inset: 0.45rem;
+  border: 1px solid rgb(111 77 186 / 0.17);
+  border-radius: 9999px;
+  content: "";
+  animation: guide-orbit-spin 9s linear infinite;
+}
+
+.guide-spark-orbit::after {
+  inset: 1.1rem;
+  border-style: dashed;
+  animation-direction: reverse;
+  animation-duration: 6s;
+}
+
+.guide-spark-core {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 4rem;
+  height: 4rem;
+  place-items: center;
+  border-radius: 1.4rem;
+  background: linear-gradient(145deg, #202f52, #6f4dba);
+  color: #f4ce63;
+  box-shadow:
+    0 18px 45px rgb(27 42 74 / 0.24),
+    0 0 0 0.55rem rgb(111 77 186 / 0.06);
+  animation: guide-core-breathe 3.5s ease-in-out infinite;
+}
+
+.guide-spark-orbit i {
+  position: absolute;
+  z-index: 2;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: var(--orange);
+  box-shadow: 0 0 1rem rgb(232 99 10 / 0.55);
+}
+
+.guide-spark-orbit i:first-of-type {
+  top: 0.6rem;
+  right: 1.15rem;
+}
+
+.guide-spark-orbit i:last-of-type {
+  bottom: 0.75rem;
+  left: 1rem;
+  width: 0.32rem;
+  height: 0.32rem;
+  background: #6f4dba;
+}
+
+.guide-quick-chip {
+  position: relative;
+  overflow: hidden;
+}
+
+.guide-quick-chip::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: linear-gradient(105deg, transparent 35%, rgb(111 77 186 / 0.08), transparent 65%);
+  translate: -120% 0;
+  transition: translate 0.45s ease;
+}
+
+.guide-quick-chip:hover::after {
+  translate: 120% 0;
+}
+
+.guide-composer {
+  box-shadow:
+    0 16px 40px -24px rgb(111 77 186 / 0.32),
+    0 0 0 1px rgb(255 255 255 / 0.7);
+}
+
+.course-showcase-card::before {
+  position: absolute;
+  top: -4.5rem;
+  right: -4rem;
+  width: 9rem;
+  height: 9rem;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgb(232 99 10 / 0.13), transparent 68%);
+  content: "";
+  transition: transform 0.45s ease;
+}
+
+.course-showcase-card:hover::before {
+  transform: scale(1.28);
+}
+
+.course-card-number {
+  position: absolute;
+  top: 0.65rem;
+  right: 1rem;
+  color: rgb(232 99 10 / 0.065);
+  font-size: 4rem;
+  font-weight: 950;
+  letter-spacing: -0.08em;
+  line-height: 1;
+  transition:
+    color 0.3s ease,
+    transform 0.3s ease;
+}
+
+.course-showcase-card:hover .course-card-number {
+  color: rgb(232 99 10 / 0.11);
+  transform: translateY(-0.2rem) rotate(2deg);
+}
+
+.course-route-line {
+  overflow: hidden;
+}
+
+.course-route-line::after {
+  position: absolute;
+  top: -40%;
+  left: 0;
+  width: 100%;
+  height: 35%;
+  border-radius: inherit;
+  background: linear-gradient(transparent, var(--orange), transparent);
+  content: "";
+  animation: course-route-travel 3.2s ease-in-out infinite;
+}
+
+.stamp-passport-card {
+  position: relative;
+  box-shadow: 0 24px 55px -28px rgb(27 42 74 / 0.55);
+}
+
+.stamp-passport-card::after {
+  position: absolute;
+  inset: -65% auto -65% -35%;
+  width: 22%;
+  content: "";
+  transform: rotate(18deg);
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.13), transparent);
+  animation: passport-shine 5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.stamp-collect-card::before {
+  position: absolute;
+  inset: 0.45rem;
+  border: 1px dashed transparent;
+  border-radius: 0.8rem;
+  content: "";
+  pointer-events: none;
+  transition:
+    inset 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.stamp-collect-card:hover::before {
+  inset: 0.3rem;
+  border-color: rgb(201 162 39 / 0.24);
+}
+
+@keyframes page-orb-drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(0.96);
+  }
+  to {
+    transform: translate3d(-1.5rem, 1rem, 0) scale(1.08);
+  }
+}
+
+@keyframes page-color-breathe {
+  to {
+    opacity: 0.72;
+    transform: scale(1.08) translateY(0.6rem);
+  }
+}
+
+@keyframes page-glint-drift {
+  from {
+    opacity: 0.45;
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(0.82);
+  }
+  to {
+    opacity: 0.95;
+    transform: translate3d(0.45rem, -0.75rem, 0) rotate(22deg) scale(1.12);
+  }
+}
+
+@keyframes page-node-pulse {
+  0%,
+  100% {
+    opacity: 0.42;
+    transform: scale(0.82);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.12);
+  }
+}
+
+@keyframes page-node-ripple {
+  0%,
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(0.65);
+  }
+  78% {
+    opacity: 0.22;
+  }
+  94% {
+    opacity: 0;
+    transform: scale(2.35);
+  }
+}
+
+@keyframes page-ring-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes page-intro-orb {
+  to {
+    transform: translate(-1rem, 1rem) scale(1.18);
+  }
+}
+
+@keyframes page-intro-shine {
+  0%,
+  52% {
+    translate: 0 0;
+  }
+  78%,
+  100% {
+    translate: 950% 0;
+  }
+}
+
+@keyframes filter-chip-select {
+  0% {
+    transform: scale(0.86);
+  }
+  58% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes filter-chip-flash {
+  from {
+    opacity: 0.9;
+    transform: scale(0.25);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.15);
+  }
+}
+
+@keyframes page-dot-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgb(var(--page-accent, 232 99 10) / 0.2);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 0.45rem rgb(var(--page-accent, 232 99 10) / 0);
+  }
+}
+
+@keyframes page-icon-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes guide-orbit-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes guide-core-breathe {
+  50% {
+    transform: translateY(-0.3rem) scale(1.035);
+    box-shadow:
+      0 24px 52px rgb(27 42 74 / 0.28),
+      0 0 0 0.8rem rgb(111 77 186 / 0.04);
+  }
+}
+
+@keyframes course-route-travel {
+  0% {
+    translate: 0 0;
+  }
+  65%,
+  100% {
+    translate: 0 400%;
+  }
+}
+
+@keyframes passport-shine {
+  0%,
+  50% {
+    translate: 0 0;
+  }
+  80%,
+  100% {
+    translate: 700% 0;
+  }
+}
+
+.section-kicker {
+  margin-bottom: 0.3rem;
+  color: var(--orange);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 850;
+  letter-spacing: -0.035em;
+}
+
+@media (min-width: 768px) {
+  .section-title {
+    font-size: 1.65rem;
+  }
+}
+
+/* 원곡동 이야기를 옆으로 넘겨 읽는 소개 카드 */
+.wongok-story-carousel {
+  width: 100%;
+  max-width: 44rem;
+  margin-inline: auto;
+}
+
+.wongok-story-viewport {
+  overflow: hidden;
+  border-radius: 1.5rem;
+  outline: none;
+  touch-action: pan-y;
+  cursor: grab;
+}
+
+.wongok-story-viewport:active {
+  cursor: grabbing;
+}
+
+.wongok-story-viewport:focus-visible {
+  box-shadow: 0 0 0 3px rgb(239 91 12 / 0.22);
+}
+
+.wongok-story-track {
+  display: flex;
+  width: 100%;
+  transition: transform 480ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.wongok-story-card {
+  position: relative;
+  isolation: isolate;
+  flex: 0 0 100%;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  min-height: 15.5rem;
+  padding: 1.25rem;
+  border: 1px solid rgb(255 255 255 / 0.88);
+  border-radius: 1.5rem;
+  background:
+    radial-gradient(circle at 88% 12%, rgb(201 162 39 / 0.18), transparent 34%),
+    linear-gradient(135deg, rgb(255 255 255 / 0.92), rgb(253 234 221 / 0.74));
+  box-shadow: 0 24px 55px -38px rgb(27 42 74 / 0.38);
+}
+
+.wongok-story-card-2 {
+  background:
+    radial-gradient(circle at 88% 12%, rgb(239 91 12 / 0.15), transparent 34%),
+    linear-gradient(135deg, rgb(255 255 255 / 0.92), rgb(255 243 228 / 0.82));
+}
+
+.wongok-story-card-3 {
+  background:
+    radial-gradient(circle at 88% 12%, rgb(50 74 121 / 0.14), transparent 34%),
+    linear-gradient(135deg, rgb(255 255 255 / 0.92), rgb(238 242 248 / 0.82));
+}
+
+.wongok-story-pattern {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  opacity: 0.32;
+  background-image: radial-gradient(rgb(239 91 12 / 0.2) 1px, transparent 1px);
+  background-size: 18px 18px;
+  mask-image: linear-gradient(100deg, transparent 22%, black);
+  pointer-events: none;
+}
+
+.wongok-story-number {
+  position: absolute;
+  right: 1rem;
+  bottom: -0.75rem;
+  color: rgb(27 42 74 / 0.055);
+  font-size: 6rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.08em;
+}
+
+.wongok-story-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  margin-top: 0.9rem;
+}
+
+.wongok-story-arrow {
+  display: inline-flex;
+  width: 2.5rem;
+  height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgb(27 42 74 / 0.1);
+  border-radius: 9999px;
+  background: rgb(255 255 255 / 0.8);
+  color: var(--navy);
+  box-shadow: 0 10px 25px -18px rgb(27 42 74 / 0.5);
+  transition: transform 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+
+.wongok-story-arrow:hover {
+  border-color: rgb(239 91 12 / 0.35);
+  color: var(--orange);
+  transform: translateY(-1px);
+}
+
+.wongok-story-arrow:active {
+  transform: scale(0.94);
+}
+
+.wongok-story-dots {
+  display: flex;
+  min-width: 4.5rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.wongok-story-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 9999px;
+  background: rgb(27 42 74 / 0.2);
+  transition: width 240ms ease, background-color 240ms ease;
+}
+
+.wongok-story-dot.is-active {
+  width: 1.4rem;
+  background: var(--orange);
+}
+
+@media (min-width: 768px) {
+  .wongok-story-card {
+    min-height: 17rem;
+    padding: 2rem;
+    border-radius: 2rem;
+  }
+
+  .wongok-story-viewport {
+    border-radius: 2rem;
+  }
+
+  .wongok-story-number {
+    right: 1.5rem;
+    font-size: 8rem;
+  }
+}
+
+/* 메인 히어로: 빛, 얇은 격자, 떠 있는 여권 카드로 첫 화면의 깊이를 만든다. */
+.hero-stage {
+  isolation: isolate;
+  background:
+    linear-gradient(125deg, #111f3e 0%, #1b2a4a 48%, #263f70 100%);
+}
+
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.12;
+  background-image:
+    linear-gradient(rgb(255 255 255 / 0.2) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.2) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: linear-gradient(to bottom, black, transparent 85%);
+}
+
+.hero-orb {
+  position: absolute;
+  z-index: -1;
+  border-radius: 9999px;
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+.hero-orb-one {
+  top: -9rem;
+  right: 12%;
+  width: 26rem;
+  height: 26rem;
+  background: rgb(232 99 10 / 0.28);
+  animation: orb-drift 9s ease-in-out infinite alternate;
+}
+
+.hero-orb-two {
+  bottom: -14rem;
+  left: 10%;
+  width: 30rem;
+  height: 30rem;
+  background: rgb(76 114 190 / 0.22);
+  animation: orb-drift 12s ease-in-out infinite alternate-reverse;
+}
+
+.hero-orbit {
+  position: absolute;
+  top: 9%;
+  right: 4%;
+  z-index: -1;
+  width: 31rem;
+  height: 31rem;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  border-radius: 9999px;
+  animation: orbit-spin 28s linear infinite;
+}
+
+.hero-orbit::before,
+.hero-orbit::after {
+  content: "";
+  position: absolute;
+  border: 1px solid rgb(255 255 255 / 0.06);
+  border-radius: inherit;
+}
+
+.hero-orbit::before {
+  inset: 3.8rem;
+}
+
+.hero-orbit::after {
+  inset: 8rem;
+}
+
+.hero-orbit > span {
+  position: absolute;
+  top: 16%;
+  left: 1.5%;
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 9999px;
+  background: var(--gold);
+  box-shadow: 0 0 24px rgb(201 162 39 / 0.9);
+}
+
+.hero-food {
+  position: absolute;
+  z-index: -1;
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  border-radius: 1rem;
+  background: rgb(255 255 255 / 0.07);
+  font-size: 1.35rem;
+  box-shadow: 0 12px 30px rgb(0 0 0 / 0.12);
+  backdrop-filter: blur(10px);
+}
+
+.hero-food-one {
+  top: 19%;
+  left: 46%;
+  animation: food-drift 5s ease-in-out infinite;
+}
+
+.hero-food-two {
+  right: 3%;
+  bottom: 25%;
+  animation: food-drift 6s 0.8s ease-in-out infinite reverse;
+}
+
+.hero-food-three {
+  bottom: 8%;
+  left: 42%;
+  animation: food-drift 5.5s 1.4s ease-in-out infinite;
+}
+
+/* 모바일 히어로는 제목·설명·검색창이 세로 공간을 모두 사용하므로,
+   음식 장식이 텍스트와 입력 영역을 침범하지 않게 데스크톱에서만 보여준다. */
+@media (max-width: 767px) {
+  .hero-orb-one {
+    top: -5rem;
+    right: -3.5rem;
+    width: 14rem;
+    height: 14rem;
+    background: rgb(232 99 10 / 0.11);
+    filter: blur(22px);
+  }
+
+  .hero-food {
+    display: none;
+  }
+}
+
+.hero-gradient-text {
+  background: linear-gradient(100deg, #fff 10%, #ffc36d 55%, #f28a40 95%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.hero-pulse {
+  box-shadow: 0 0 0 0 rgb(232 99 10 / 0.65);
+  animation: hero-pulse 2s infinite;
+}
+
+.passport-float {
+  animation: passport-float 5.5s ease-in-out infinite;
+}
+
+.passport-slot {
+  transition:
+    transform 0.25s ease,
+    background-color 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.passport-slot:hover {
+  transform: translateY(-4px);
+  border-color: rgb(201 162 39 / 0.5);
+  background: rgb(255 255 255 / 0.08);
+}
+
+.district-card:hover {
+  transform: translateY(-8px) rotate(-0.6deg);
+  border-color: rgb(232 99 10 / 0.22);
+  box-shadow: 0 20px 40px -18px rgb(27 42 74 / 0.28);
+}
+
+.district-card-live {
+  animation: card-breathe 5s ease-in-out infinite;
+}
+
+.district-card-live:nth-child(2) {
+  animation-delay: -1s;
+}
+
+.district-card-live:nth-child(3) {
+  animation-delay: -2s;
+}
+
+.district-card-live:nth-child(4) {
+  animation-delay: -3s;
+}
+
+.district-card-live:nth-child(5) {
+  animation-delay: -4s;
+}
+
+.district-sweep {
+  position: absolute;
+  inset: -50%;
+  background: conic-gradient(
+    from 180deg,
+    transparent 0 38%,
+    rgb(232 99 10 / 0.13) 44%,
+    transparent 50% 100%
+  );
+  animation: sweep-spin 8s linear infinite;
+}
+
+.district-card::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  border: 1px solid rgb(255 255 255 / 0.55);
+  pointer-events: none;
+}
+
+.district-card:nth-child(even):hover {
+  transform: translateY(-8px) rotate(0.6deg);
+}
+
+.course-card:hover {
+  transform: translateY(-7px);
+  border-color: rgb(232 99 10 / 0.18);
+  box-shadow: 0 24px 50px -24px rgb(27 42 74 / 0.32);
+}
+
+.course-card::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--orange), var(--gold));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s ease;
+}
+
+.course-card:hover::after {
+  transform: scaleX(1);
+}
+
+.stamp-shine::after {
+  content: "";
+  position: absolute;
+  inset: -60% auto -60% -30%;
+  width: 18%;
+  transform: rotate(18deg);
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.3), transparent);
+  animation: banner-shine 4.5s ease-in-out infinite;
+}
+
+.world-ticker {
+  box-shadow: 0 10px 35px rgb(27 42 74 / 0.04);
+}
+
+.world-ticker-track {
+  display: flex;
+  width: max-content;
+  animation: ticker-move 26s linear infinite;
+}
+
+.ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding-inline: 1.25rem;
+  color: rgb(27 42 74 / 0.65);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  white-space: nowrap;
+}
+
+.ticker-item b {
+  font-size: 1.1rem;
+  font-weight: 400;
+}
+
+.ticker-item i {
+  color: var(--orange);
+  font-size: 0.55rem;
+  font-style: normal;
+}
+
+@keyframes orb-drift {
+  to {
+    transform: translate3d(2.5rem, 1.5rem, 0) scale(1.08);
+  }
+}
+
+@keyframes orbit-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes food-drift {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-5deg);
+  }
+  50% {
+    transform: translateY(-14px) rotate(7deg);
+  }
+}
+
+@keyframes sweep-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes card-breathe {
+  0%,
+  100% {
+    box-shadow: 0 8px 24px -20px rgb(27 42 74 / 0.15);
+  }
+  50% {
+    box-shadow: 0 18px 36px -22px rgb(232 99 10 / 0.3);
+  }
+}
+
+@keyframes ticker-move {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes passport-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(2deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+}
+
+@keyframes hero-pulse {
+  70% {
+    box-shadow: 0 0 0 8px rgb(232 99 10 / 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgb(232 99 10 / 0);
+  }
+}
+
+@keyframes banner-shine {
+  0%,
+  60% {
+    left: -30%;
+  }
+  100% {
+    left: 125%;
+  }
+}
+
+/*
+ * 배경 색번짐. 크림 단색이 밋밋해 보이지 않도록 오렌지·골드·네이비 빛을 깔아
+ * 깊이를 주고, 흰 카드가 배경 위로 떠 보이게 한다.
+ * 화면에 고정된 레이어라 스크롤해도 번짐 위치가 유지되고,
+ * z-index -1 로 본문 뒤에 있어 어떤 요소도 가리지 않는다.
+ * 크기는 vw/vh 기준이라 좁은 화면에서도 단색처럼 퍼지지 않는다.
+ */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent 0 7%, rgb(27 42 74 / 0.025) 7% 7.1%, transparent 7.1% 93%, rgb(232 99 10 / 0.035) 93% 93.1%, transparent 93.1%),
+    radial-gradient(55vw 38vh at 5% 0%, rgb(232 99 10 / 0.07), transparent 72%),
+    radial-gradient(48vw 34vh at 100% 28%, rgb(46 67 112 / 0.06), transparent 74%);
+}
+
+/*
+ * Borderless editorial system
+ * 둥근 흰 카드가 반복되던 인상을 걷고, 동네를 직접 탐색하는 현장 지도와
+ * 여행 여권의 조판을 결합한다. 장식 문구는 정보와 분리해 다국어 흐름을 방해하지 않는다.
+ */
+.top-nav-shell {
+  border-bottom: 1px solid rgb(255 255 255 / 0.08);
+  background:
+    linear-gradient(90deg, rgb(255 255 255 / 0.025) 1px, transparent 1px),
+    #101d39;
+  background-size: 32px 100%;
+  box-shadow: 0 10px 28px rgb(15 29 57 / 0.16);
+}
+
+.top-nav-mark {
+  position: relative;
+  display: flex;
+  width: 3.2rem;
+  height: 2.35rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.18rem;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 0.18);
+  border-radius: 0.55rem 1.1rem 1.1rem 0.55rem;
+  background: var(--orange);
+  color: white;
+  box-shadow: inset 0 -9px 20px rgb(125 41 0 / 0.18);
+  transition: transform 180ms ease;
+}
+
+.group:hover .top-nav-mark {
+  transform: rotate(-3deg) translateY(-1px);
+}
+
+.top-nav-mark::before {
+  position: absolute;
+  top: 0.35rem;
+  bottom: 0.35rem;
+  left: 0.35rem;
+  border-left: 1px dashed rgb(255 255 255 / 0.45);
+  content: "";
+}
+
+.top-nav-mark b {
+  font-size: 0.58rem;
+  letter-spacing: 0.06em;
+}
+
+.top-nav-link {
+  border: 1px solid transparent;
+  border-radius: 0.65rem;
+}
+
+.top-nav-link.bg-orange {
+  border-color: rgb(255 255 255 / 0.15);
+  box-shadow: 0 7px 20px rgb(232 99 10 / 0.25);
+}
+
+.bottom-nav-shell {
+  border: 1px solid rgb(255 255 255 / 0.12);
+  border-radius: 1.55rem;
+  background: rgb(16 29 57 / 0.96);
+  box-shadow: 0 16px 42px rgb(10 20 42 / 0.3);
+  backdrop-filter: blur(18px);
+}
+
+.bottom-nav-item {
+  position: relative;
+}
+
+.bottom-nav-item::before {
+  position: absolute;
+  top: -0.5rem;
+  width: 1.6rem;
+  height: 0.18rem;
+  border-radius: 0 0 999px 999px;
+  background: var(--orange);
+  content: "";
+  opacity: 0;
+  transform: scaleX(0.3);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.bottom-nav-item.is-active::before {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.bottom-nav-ai {
+  border: 5px solid #101d39;
+  outline: 1px solid rgb(255 255 255 / 0.14);
+}
+
+.map-page {
+  --page-accent: 255 100 35;
+  --map-ink: #101d39;
+}
+
+.map-page::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -2rem;
+  z-index: -1;
+  width: 0.35rem;
+  background: linear-gradient(var(--orange) 0 16rem, rgb(27 42 74 / 0.08) 16rem);
+  content: "";
+}
+
+.map-hero {
+  position: relative;
+  min-height: 12.5rem;
+  overflow: hidden;
+  padding: 2.1rem 1.35rem 1.3rem;
+  border-radius: 0.75rem 2.4rem 0.75rem 2.4rem;
+  background:
+    radial-gradient(circle at 84% 22%, rgb(255 156 80 / 0.22), transparent 25%),
+    linear-gradient(125deg, #0d1931 0%, #172a50 58%, #233e6c 100%);
+  color: white;
+  box-shadow: 0 28px 55px -30px rgb(12 27 55 / 0.75);
+}
+
+.map-hero::before,
+.map-hero::after {
+  position: absolute;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 999px;
+  background: var(--background);
+  content: "";
+}
+
+.map-hero::before { top: 50%; left: -0.8rem; }
+.map-hero::after { top: 50%; right: -0.8rem; }
+
+.map-hero-grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.16;
+  background-image:
+    linear-gradient(rgb(255 255 255 / 0.22) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.22) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: linear-gradient(100deg, black, transparent 72%);
+}
+
+.map-hero-copy {
+  position: relative;
+  z-index: 1;
+  max-width: calc(100% - 6rem);
+}
+
+.map-hero-kicker {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: #ffc675;
+  font-size: 0.62rem;
+  font-weight: 850;
+  letter-spacing: 0.17em;
+}
+
+.map-live-signal,
+.map-frame-status i {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: #ff7b2f;
+  box-shadow: 0 0 0 0.3rem rgb(255 123 47 / 0.13);
+  animation: page-dot-pulse 2s ease-out infinite;
+}
+
+.map-hero h1 {
+  margin-top: 1.25rem;
+  font-size: clamp(2rem, 7vw, 4.5rem);
+  font-weight: 900;
+  line-height: 0.98;
+  letter-spacing: -0.075em;
+  text-wrap: balance;
+}
+
+.map-hero-stats {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 1.25rem;
+  color: rgb(255 255 255 / 0.56);
+  font-size: 0.58rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+}
+
+.map-hero-stats span {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+}
+
+.map-hero-stats b {
+  color: white;
+  font-size: 1.05rem;
+  letter-spacing: -0.03em;
+}
+
+.map-hero-stats i {
+  width: 1.5rem;
+  border-top: 1px solid rgb(255 255 255 / 0.2);
+}
+
+.map-passport-mark {
+  position: absolute;
+  top: 3.15rem;
+  right: 1rem;
+  z-index: 1;
+  display: grid;
+  width: 5rem;
+  height: 7.2rem;
+  place-items: center;
+  padding: 0.55rem 0.35rem;
+  border: 1px solid rgb(255 198 117 / 0.38);
+  border-radius: 2.4rem 2.4rem 0.65rem 0.65rem;
+  color: #ffc675;
+  transform: rotate(5deg);
+}
+
+.map-passport-ring {
+  display: grid;
+  width: 2.6rem;
+  height: 2.6rem;
+  place-items: center;
+  border: 1px dashed currentColor;
+  border-radius: 50%;
+}
+
+.map-passport-mark > b {
+  font-size: 0.9rem;
+  letter-spacing: 0.18em;
+}
+
+.map-passport-mark small {
+  text-align: center;
+  font-size: 0.42rem;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: 0.14em;
+}
+
+.map-hero-coordinate {
+  position: absolute;
+  right: 1.1rem;
+  bottom: 0.75rem;
+  color: rgb(255 255 255 / 0.25);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.48rem;
+  letter-spacing: 0.08em;
+}
+
+.map-search-panel {
+  position: relative;
+  z-index: 2;
+  margin-top: -2rem;
+  margin-inline: 0.75rem;
+  border: 1px solid rgb(16 29 57 / 0.11);
+  border-radius: 0.7rem 1.45rem 1.45rem 0.7rem;
+  background: rgb(255 255 255 / 0.97);
+  box-shadow: 0 18px 32px -18px rgb(16 29 57 / 0.45);
+}
+
+.map-search-icon {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  flex: none;
+  place-items: center;
+  border-radius: 0.5rem;
+  background: var(--map-ink);
+  color: white;
+}
+
+.map-filter-deck {
+  position: relative;
+  padding: 1rem 0.75rem 0.75rem;
+  border-block: 1px solid rgb(27 42 74 / 0.09);
+}
+
+.map-filter-deck::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 3px;
+  border-radius: 999px;
+  background: linear-gradient(var(--orange), var(--gold));
+  content: "";
+}
+
+.map-page .filter-chip {
+  border-radius: 0.55rem 1.1rem 1.1rem 0.55rem;
+  box-shadow: 0 5px 14px -12px rgb(16 29 57 / 0.42);
+}
+
+.map-page .filter-chip-active {
+  box-shadow: 0 9px 20px -11px rgb(232 99 10 / 0.75);
+}
+
+.map-frame {
+  border: 5px solid var(--map-ink);
+  border-radius: 1.1rem 2.5rem 1.1rem 2.5rem;
+  box-shadow: 0 28px 55px -34px rgb(16 29 57 / 0.65);
+}
+
+.map-frame-bar {
+  display: flex;
+  min-height: 2.65rem;
+  align-items: center;
+  justify-content: space-between;
+  padding-inline: 0.75rem;
+  background: var(--map-ink);
+  color: white;
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+}
+
+.map-frame-status,
+.map-frame-location {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.map-frame-location {
+  color: rgb(255 255 255 / 0.46);
+}
+
+.map-results {
+  scrollbar-color: rgb(232 99 10 / 0.35) transparent;
+  scrollbar-width: thin;
+}
+
+.map-results-header {
+  display: flex;
+  min-height: 4.25rem;
+  align-items: end;
+  justify-content: space-between;
+  padding: 0.7rem 0.2rem 0.65rem;
+  border-bottom: 2px solid var(--map-ink);
+}
+
+.map-results-header > div {
+  display: flex;
+  align-items: end;
+  gap: 0.65rem;
+}
+
+.map-results-header span {
+  padding-bottom: 0.18rem;
+  color: var(--orange);
+  font-size: 0.56rem;
+  font-weight: 850;
+  letter-spacing: 0.15em;
+}
+
+.map-results-header strong {
+  color: var(--map-ink);
+  font-size: 2.15rem;
+  font-weight: 900;
+  line-height: 0.85;
+  letter-spacing: -0.08em;
+}
+
+.map-results-header small {
+  margin-left: 0.3rem;
+  color: rgb(27 42 74 / 0.4);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.map-results-header p {
+  max-width: 48%;
+  overflow: hidden;
+  color: rgb(27 42 74 / 0.45);
+  font-size: 0.66rem;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.place-card {
+  border-radius: 0.65rem 1.45rem 1.45rem 0.65rem;
+  box-shadow: 0 12px 28px -24px rgb(16 29 57 / 0.5);
+}
+
+.place-card::before {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: 0.24rem;
+  background: rgb(27 42 74 / 0.12);
+  content: "";
+  transition: background-color 180ms ease;
+}
+
+.place-card:hover::before,
+.place-card.is-selected::before {
+  background: var(--orange);
+}
+
+.place-card:hover {
+  border-color: rgb(232 99 10 / 0.28);
+  box-shadow: 0 18px 34px -25px rgb(16 29 57 / 0.6);
+}
+
+.place-card.is-selected {
+  background: linear-gradient(100deg, #fff8f2, white 50%);
+  box-shadow: 0 0 0 2px rgb(232 99 10 / 0.12), 0 20px 35px -26px rgb(232 99 10 / 0.7);
+}
+
+.place-card-visual-wrap {
+  position: relative;
+  flex: none;
+  overflow: hidden;
+  border-radius: 0.45rem 1rem 1rem 0.45rem;
+}
+
+.place-card-index {
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-width: 1.65rem;
+  padding: 0.2rem 0.35rem;
+  border-radius: 0 0 0.5rem;
+  background: rgb(16 29 57 / 0.9);
+  color: white;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.58rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+}
+
+.place-card-district {
+  border: 1px solid rgb(27 42 74 / 0.1);
+  border-radius: 0.25rem 0.75rem 0.75rem 0.25rem;
+  background: #f4eee7;
+}
+
+.map-location-button {
+  position: relative;
+  display: inline-flex;
+  width: 2.75rem;
+  height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0;
+  border: 1px solid rgb(16 29 57 / 0.12);
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.96);
+  color: var(--map-ink);
+  font-size: 0.68rem;
+  font-weight: 800;
+  box-shadow: 0 12px 26px -14px rgb(16 29 57 / 0.55);
+  backdrop-filter: blur(10px);
+  transition: transform 180ms ease, background-color 180ms ease, color 180ms ease;
+}
+
+.map-location-button:hover {
+  transform: translateY(-1px);
+}
+
+.map-location-button.is-tracking {
+  border-color: #2563eb;
+  background: #1d4ed8;
+  color: white;
+}
+
+.map-location-spinner {
+  position: absolute;
+  inset: 0.2rem;
+  border: 2px solid rgb(37 99 235 / 0.25);
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: page-icon-spin 0.8s linear infinite;
+}
+
+.map-location-button.is-tracking .map-location-spinner {
+  border-color: rgb(255 255 255 / 0.32);
+  border-top-color: white;
+}
+
+.map-location-message {
+  max-width: 16rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid rgb(37 99 235 / 0.18);
+  border-radius: 0.55rem;
+  background: rgb(239 246 255 / 0.96);
+  color: #1e3a8a;
+  font-size: 0.66rem;
+  font-weight: 650;
+  line-height: 1.45;
+  box-shadow: 0 10px 24px -18px rgb(16 29 57 / 0.5);
+  backdrop-filter: blur(10px);
+}
+
+.map-location-message.is-error {
+  border-color: rgb(220 38 38 / 0.18);
+  background: rgb(254 242 242 / 0.97);
+  color: #991b1b;
+}
+
+.user-location-marker {
+  position: relative;
+  display: grid;
+  width: 1.7rem;
+  height: 1.7rem;
+  place-items: center;
+  border: 3px solid white;
+  border-radius: 50%;
+  background: #2563eb;
+  box-shadow: 0 4px 12px rgb(30 64 175 / 0.45);
+}
+
+.user-location-marker::before,
+.user-location-marker::after {
+  position: absolute;
+  inset: -0.55rem;
+  border: 2px solid rgb(37 99 235 / 0.35);
+  border-radius: 50%;
+  content: "";
+  animation: user-location-pulse 2s ease-out infinite;
+}
+
+.user-location-marker::after {
+  animation-delay: 1s;
+}
+
+.user-location-marker > i {
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 50%;
+  background: white;
+}
+
+@keyframes user-location-pulse {
+  from { opacity: 0.9; transform: scale(0.55); }
+  to { opacity: 0; transform: scale(1.4); }
+}
+
+@media (min-width: 768px) {
+  .map-hero {
+    min-height: 17rem;
+    padding: 3rem 3.2rem;
+  }
+
+  .map-hero-copy { max-width: 72%; }
+  .map-passport-mark { top: 2rem; right: 3rem; width: 7rem; height: 10rem; }
+  .map-passport-ring { width: 3.8rem; height: 3.8rem; }
+  .map-search-panel { width: calc(100% - 7rem); margin: -2.45rem auto 0; }
+  .map-filter-deck { padding: 1.15rem 1.25rem 1rem; }
+}
+
+/* 터치 시 브라우저 기본 회색 하이라이트 제거 — active: 스타일로 직접 피드백을 준다 */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 스크롤 등장 효과. is-visible은 Reveal 컴포넌트가 붙인다. */
+.reveal {
+  opacity: 0;
+  transform: translateY(1rem);
+  transition:
+    opacity 0.55s ease-out,
+    transform 0.55s ease-out;
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.reveal-item {
+  opacity: 0;
+  transform: translateY(0.75rem);
+  transition:
+    opacity 0.45s ease-out,
+    transform 0.45s ease-out;
+}
+
+.reveal.is-visible .reveal-item {
+  opacity: 1;
+  transform: none;
+}
+
+/* JS가 꺼져 있으면 클래스를 붙일 주체가 없으므로 처음부터 보이게 한다 */
+@media (scripting: none) {
+  .reveal,
+  .reveal-item {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/*
+ * 가로 스크롤 줄(필터 칩, 카드 캐러셀)의 스크롤바 숨김.
+ * 오버레이 스크롤바가 콘텐츠 위에 회색 막대로 겹쳐 보이는 것을 막는다.
+ * 스크롤 자체는 그대로 동작한다.
+ */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* 새로 나타나는 항목(챗 말풍선, 필터 결과, 스탬프 칸)의 등장 */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.fade-up {
+  animation: fade-up 0.35s ease-out both;
+}
+
+/* 획득한 스탬프가 도장처럼 찍히는 연출 */
+@keyframes stamp-pop {
+  0% {
+    transform: scale(0.4) rotate(-14deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.14) rotate(4deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0);
+    opacity: 1;
+  }
+}
+
+.stamp-pop {
+  animation: stamp-pop 0.45s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+  animation-delay: inherit;
+}
+
+/* AI 가이드 입력 중 표시 */
+@keyframes typing-dot {
+  0%,
+  60%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-0.15rem);
+  }
+}
+
+.typing-dot {
+  animation: typing-dot 1.2s infinite ease-in-out;
+}
+
+/* 동작 최소화를 선호하는 사용자에게는 애니메이션을 걷어낸다 */
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal-item {
+    opacity: 1;
+    transform: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
